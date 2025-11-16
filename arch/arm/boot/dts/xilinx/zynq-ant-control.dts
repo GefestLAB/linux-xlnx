@@ -1,0 +1,119 @@
+/dts-v1/;
+/include/ "zynq-7000.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	model = "GLAB Anminer Control Board";
+	compatible = "xlnx,zynq-7000";
+
+	aliases {
+		ethernet0 = &gem0;
+		serial0 = &uart1;
+		mmc0 = &sdhci0;
+		gpio0 = &gpio0;
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x40000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		bootcount@efffff0 {
+			reg = <0xefffff0 0x10>;
+			no-map;
+		};
+
+		fpga_space@f000000 {
+			reg = <0xf000000 0x1000000>;
+			no-map;
+		};
+	};
+
+	chosen {
+		bootargs = "earlycon";
+		stdout-path = "serial0:115200n8";
+	};
+};
+
+&clkc {
+	ps-clk-frequency = <33333333>;
+};
+
+&nfc0 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	nand@0 {
+		reg = <0>;
+	};
+};
+
+&smcc {
+	status = "okay";
+};
+
+&gem0 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy>;
+
+	/* 0362/5e62 */
+	ethernet_phy: ethernet-phy@1 {
+		reg = <1>;
+	};
+};
+
+&sdhci0 {
+	bootph-all;
+	status = "okay";
+	disable-wp;
+};
+
+&uart1 {
+	bootph-all;
+	status = "okay";
+};
+
+&watchdog0 {
+	reset-on-timeout;
+	timeout-sec = <200>;
+};
+
+&amba {
+	compatible = "simple-bus";
+	#address-cells = <0x1>;
+	#size-cells = <0x1>;
+	ranges;
+	axi_uartlite_0:serial@42C00000 {
+		compatible = "xlnx,xps-uartlite-1.00.a";
+		reg = <0x42C00000 0x10000>;
+		interrupt-parent = <&intc>;
+		interrupts = <0 29 4>;
+		clock= <100000000>;
+	};
+	axi_uartlite_1:serial@42C10000 {
+		compatible = "xlnx,xps-uartlite-1.00.a";
+		reg = <0x42C10000 0x10000>;
+		interrupt-parent = <&intc>;
+		interrupts = <0 29 4>;
+		clock= <100000000>;
+	};
+};
+
+&axi_uartlite_0 {
+	bootph-all;
+	status = "okay";
+};
+
+&axi_uartlite_1 {
+	bootph-all;
+	status = "okay";
+};
+

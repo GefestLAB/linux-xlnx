@@ -93,6 +93,7 @@
 	ranges;
 	axi_uartlite_0:serial@42C00000 {
 		compatible = "xlnx,xps-uartlite-1.00.a";
+		current-speed = <9600>;
 		reg = <0x42C00000 0x10000>;
 		interrupt-parent = <&intc>;
 		interrupts = <0 29 4>;
@@ -100,6 +101,7 @@
 	};
 	axi_uartlite_1:serial@42C10000 {
 		compatible = "xlnx,xps-uartlite-1.00.a";
+		current-speed = <9600>;
 		reg = <0x42C10000 0x10000>;
 		interrupt-parent = <&intc>;
 		interrupts = <0 29 4>;

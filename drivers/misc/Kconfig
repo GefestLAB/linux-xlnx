@@ -611,6 +611,11 @@ config RSMU
 	  and other networking timing functions. It is used by the synced software to
 	  manage the Synchronous Ethernet (SyncE) device.
 
+config FAN_TACH
+    tristate "gLab AXI Fan Tachometer"
+    depends on OF
+    default n
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

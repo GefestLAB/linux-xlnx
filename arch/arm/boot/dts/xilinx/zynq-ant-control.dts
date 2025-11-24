@@ -40,6 +40,86 @@
 		bootargs = "earlycon";
 		stdout-path = "serial0:115200n8";
 	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+		sys-led {
+			label = "sys-led";
+			gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		usr-led1 {
+			label = "usr-led1";
+			gpios = <&gpio0 37 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		usr-led2 {
+			label = "usr-led2";
+			gpios = <&gpio0 38 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+        led0 {
+            label = "led0";
+            gpios = <&axi_gpio 0 GPIO_ACTIVE_LOW>;
+            default-state = "off";
+            linux,default-trigger = "heartbeat";
+        };
+
+        led1 {
+            label = "led1";
+            gpios = <&axi_gpio 1 GPIO_ACTIVE_LOW>;
+            linux,default-trigger = "none";
+            default-state = "off";
+        };
+
+        led2 {
+            label = "led2";
+            gpios = <&axi_gpio 2 GPIO_ACTIVE_LOW>;
+            linux,default-trigger = "none";
+            default-state = "off";
+        };
+
+        led3 {
+            label = "led3";
+            gpios = <&axi_gpio 3 GPIO_ACTIVE_LOW>;
+            linux,default-trigger = "none";
+            default-state = "off";
+        };
+	};
+
+	gpio-beep {
+		compatible = "gpio-beeper";
+		label = "pl-beep";
+		gpios = <&gpio0 39 0x01>;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		debounce-interval = <100>;
+		autorepeat;
+		K1 {
+			label = "K1";
+			gpios = <&gpio0 51 0x1>;
+			linux,code = <59>; /*KEY_F1*/
+			wakeup-source;
+			autorepeat;
+		};
+		RST {
+			label = "RST";
+			gpios = <&gpio0 47 0x1>;
+			linux,code = <0x198>; /*KEY_RESTART*/
+			wakeup-source;
+			autorepeat;
+		};
+	};
+
+	beeper {
+		compatible = "pwm-beeper";
+		pwms = <&mypwm0 0 500000 0>;
+	};
 };
 
 &clkc {
@@ -52,6 +132,11 @@
 	#size-cells = <0>;
 	nand@0 {
 		reg = <0>;
+		nand-on-flash-bbt; /* используем bad-block table на флеше */
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+
 	};
 };
 
@@ -63,6 +148,9 @@
 	status = "okay";
 	phy-mode = "rgmii-id";
 	phy-handle = <&ethernet_phy>;
+
+    local-mac-address = [02 00 00 00 00 01];
+    mac-address       = [02 00 00 00 00 01];
 
 	/* 0362/5e62 */
 	ethernet_phy: ethernet-phy@1 {
@@ -91,21 +179,50 @@
 	#address-cells = <0x1>;
 	#size-cells = <0x1>;
 	ranges;
-	axi_uartlite_0:serial@42C00000 {
+
+	axi_uartlite_0: serial@42C00000 {
 		compatible = "xlnx,xps-uartlite-1.00.a";
 		current-speed = <9600>;
-		reg = <0x42C00000 0x10000>;
+		reg = <0x42C00000 0x00010000>;
 		interrupt-parent = <&intc>;
 		interrupts = <0 29 4>;
-		clock= <100000000>;
+		clock-frequency = <100000000>;
 	};
-	axi_uartlite_1:serial@42C10000 {
+
+	axi_uartlite_1: serial@42C10000 {
 		compatible = "xlnx,xps-uartlite-1.00.a";
 		current-speed = <9600>;
-		reg = <0x42C10000 0x10000>;
+		reg = <0x42C10000 0x00010000>;
 		interrupt-parent = <&intc>;
 		interrupts = <0 29 4>;
-		clock= <100000000>;
+		clock-frequency = <100000000>;
+	};
+
+	fan_tach0: fan-tach@40000000 {
+		compatible = "glab,fan-tach";
+		reg = <0x40000000 0x1000>;
+		pulses-per-rev = <2>;
+		gate-ms = <100>;
+	};
+
+	mypwm0: pwm@0x40001000 {
+		compatible = "glab,axi-pwm-1.0";
+		reg = <0x40001000 0x1000>;
+		clocks = <&clkc 15>;                  
+		clock-names = "fclk0";
+		#pwm-cells = <3>;
+		status = "okay";
+	};
+
+	axi_gpio: gpio@41200000 {
+		compatible = "xlnx,axi-gpio-2.0", "xlnx,xps-gpio-1.00.a";
+		reg = <0x41200000 0x10000>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpio = <4>;
+		gpio-line-names = "LED 0","LED 1","LED 2","LED 3";
+		status = "okay";
 	};
 };
 

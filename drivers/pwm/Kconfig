@@ -686,4 +686,10 @@ config PWM_XILINX
 	  To compile this driver as a module, choose M here: the module
 	  will be called pwm-xilinx.
 
+config PWM_MYAXI
+    tristate "GLAB AXI PWM controller"
+    depends on OF
+    help
+      AXI4-Lite PWM used on Zynq PL.
+
 endif
